@@ -27,3 +27,11 @@ export function notFound (body?: Record<string, any>): HttpResponse {
         body: JSON.stringify(body || {})
     };
 }
+
+//conflict
+export function conflict (body?: Record<string, any>): HttpResponse {
+    return {
+        statusCode: 409,
+        body: JSON.stringify(body || {})
+    };
+}

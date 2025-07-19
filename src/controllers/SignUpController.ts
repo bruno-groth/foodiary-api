@@ -1,6 +1,9 @@
 import z from "zod";
 import { HttpRequest, HttpResponse } from "../types/Http";
-import { badRequest, created } from "../utils/http";
+import { badRequest, conflict, created } from "../utils/http";
+import { db } from "../db";
+import { usersTable } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 const schema = z.object({
     goal: z.enum(['lose_weight', 'maintain_weight', 'gain_weight']),
@@ -23,11 +26,32 @@ export class SignUpController {
         const { success, error, data } = schema.safeParse(request.body);
 
         if (!success) {
-            return badRequest({errors: error.issues})
+            return badRequest({ errors: error.issues })
+        }
+        const userAlreadyExists = await db.query.usersTable.findFirst({
+            columns: {
+                email: true,
+            },
+            where: eq(usersTable.email, data.account.email),
+        });
+
+        if (userAlreadyExists) {
+            return conflict({ message: "This email is already in use." });
         }
 
+        const [user] = await db.insert(usersTable).values({
+            ...data,
+            ...data.account,
+            calories: 0,
+            proteins: 0,
+            carbs: 0,
+            fats: 0,
+        })
+        .returning({ id: usersTable.id });
+
+
         return created({
-            accessToken: 'signup: token de acesso',
+            userId: user.id,
         })
     };
 }
