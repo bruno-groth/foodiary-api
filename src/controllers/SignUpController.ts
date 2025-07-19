@@ -5,10 +5,12 @@ import { db } from "../db";
 import { usersTable } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { hash } from 'bcryptjs';
+import { generateSignAccessToken } from "../lib/jwt";
+import { calculateGoals } from "../lib/goalCalculator";
 
 // validação
 const schema = z.object({
-    goal: z.enum(['lose_weight', 'maintain_weight', 'gain_weight']),
+    goal: z.enum(['lose', 'maintain', 'gain']),
     gender: z.enum(['male', 'female']),
     birthDate: z.iso.date(),
     height: z.number().min(50, "Height must be at least 50 cm").max(250, "Height must be at most 250 cm"),
@@ -40,22 +42,32 @@ export class SignUpController {
             return conflict({ message: "This email is already in use." });
         }
 
+        const goals = calculateGoals({
+            activityLevel: data.activityLevel,
+            gender: data.gender,
+            height: data.height,
+            weight: data.weight,
+            birthDate: new Date(data.birthDate),
+            goal: data.goal,
+        })
+
         const passwordHash = await hash(data.account.password, 8);
 
-        const [user] = await db.insert(usersTable).values({
-            ...data,
-            ...data.account,
-            password: passwordHash,
-            calories: 0,
-            proteins: 0,
-            carbs: 0,
-            fats: 0,
-        })
+        const [user] = await db
+            .insert(usersTable)
+            .values({
+                ...data,
+                ...data.account,
+                ...goals,
+                password: passwordHash,
+            })
             .returning({ id: usersTable.id });
 
 
+        const accessToken = generateSignAccessToken(user.id);
+
         return created({
-            userId: user.id,
+            accessToken
         })
     };
 }

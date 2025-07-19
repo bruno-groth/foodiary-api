@@ -16,6 +16,7 @@ provider:
   environment:
     # Define environment variables here
     DATABASE_URL: ${env:DATABASE_URL} # Use the DATABASE_URL from .env file
+    JWT_SECRET: ${env:JWT_SECRET} # Use the JWT_SECRET from .env file
 
 #package
 package:
@@ -40,3 +41,10 @@ functions:
       - httpApi:
           path: /signup
           method: post
+
+  me:
+    handler: src/functions/me.handler
+    events:
+      - httpApi:
+          path: /me
+          method: get
