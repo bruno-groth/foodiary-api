@@ -8,5 +8,5 @@ export async function handler(event: APIGatewayProxyEventV2) {
 
     const response = await SignInController.handle(request);
 
-    return parseHttpResponse(response);
+    return await parseHttpResponse(response);
 }

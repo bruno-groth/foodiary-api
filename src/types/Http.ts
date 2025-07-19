@@ -6,5 +6,5 @@ export type HttpRequest = {
 
 export type HttpResponse = {
     statusCode: number;
-    body?: Record<string, any>;
+    body?: string | Record<string, any>;
 };

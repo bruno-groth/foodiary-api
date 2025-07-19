@@ -5,5 +5,5 @@ import { parseHttpEvent } from "../utils/parseHttpEvent";
 export async function handler(event: APIGatewayProxyEventV2) {
     const request = parseHttpEvent(event);
 
-    await SignUpController.handle(request);
+    return await SignUpController.handle(request);
 }
