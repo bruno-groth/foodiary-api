@@ -29,11 +29,11 @@ functions:
     events:
       - httpApi:
           path: /signin
-          method: get
+          method: post
 
   signup:
     handler: src/functions/signup.handler
     events:
       - httpApi:
           path: /signup
-          method: get
+          method: post
