@@ -1,14 +1,9 @@
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { SignInController } from "../controllers/SignInController";
+import { parseHttpEvent } from "../utils/parseHttpEvent";
 
 export async function handler(event: APIGatewayProxyEventV2) {
-    const body = JSON.parse(event.body ?? '{}');
-    const params = event.pathParameters ?? {};
-    const queryParams = event.queryStringParameters ?? {};
+    const request = parseHttpEvent(event);
 
-    await SignInController.handle({
-        body,
-        params,
-        queryParams
-    });
+    await SignInController.handle(request);
 }

@@ -1,8 +1,9 @@
-export async function handler(event) {
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            'message': 'Vamos fazer sign up',
-        }),
-    }
+import { APIGatewayProxyEventV2 } from "aws-lambda";
+import { SignUpController } from "../controllers/SignUpController";
+import { parseHttpEvent } from "../utils/parseHttpEvent";
+
+export async function handler(event: APIGatewayProxyEventV2) {
+    const request = parseHttpEvent(event);
+
+    await SignUpController.handle(request);
 }
