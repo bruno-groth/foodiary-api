@@ -4,7 +4,9 @@ import { badRequest, conflict, created } from "../utils/http";
 import { db } from "../db";
 import { usersTable } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { hash } from 'bcryptjs';
 
+// validação
 const schema = z.object({
     goal: z.enum(['lose_weight', 'maintain_weight', 'gain_weight']),
     gender: z.enum(['male', 'female']),
@@ -17,7 +19,6 @@ const schema = z.object({
         email: z.email(),
         password: z.string().min(8, "Password must be at least 8 characters long"),
     }),
-
 });
 
 export class SignUpController {
@@ -39,15 +40,18 @@ export class SignUpController {
             return conflict({ message: "This email is already in use." });
         }
 
+        const passwordHash = await hash(data.account.password, 8);
+
         const [user] = await db.insert(usersTable).values({
             ...data,
             ...data.account,
+            password: passwordHash,
             calories: 0,
             proteins: 0,
             carbs: 0,
             fats: 0,
         })
-        .returning({ id: usersTable.id });
+            .returning({ id: usersTable.id });
 
 
         return created({
